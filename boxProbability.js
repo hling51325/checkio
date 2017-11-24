@@ -1,53 +1,39 @@
 function boxProbability(marbles, step) {
     marbles = marbles.split('')
-    // 1/3 -> (2/3)2/3 or (1/3)0
-    let start = {
-        w: 1,
-        b: 2
-    }
     let count = marbles.length
     let array = [{
-        marbles: start,
+        w: marbles.filter(marble => marble === 'w').length,
+        b: marbles.filter(marble => marble === 'b').length,
         rate: 1
     }]
 
-    let curr = [
-        {
-            marbles: start,
-            rate: 1
-        }
-    ]
-
-    while (step > 0) {
-        let _curr =[]
-        curr.forEach(item => {
-            let result1 = Object.assign({}, item.marbles)
-            result1.w = Math.abs(result1.w + 1)
+    while (step > 1) {
+        let curr = []
+        array.forEach(item => {
+            let result1 = Object.assign({}, item)
+            let rate1 = result1.b / count * item.rate
+            if (Math.abs(result1.w + 1) % count === 0) {
+                result1.w = Math.abs(result1.w + 1)
+            } else {
+                result1.w = Math.abs(result1.w + 1) % count
+            }
             result1.b = count - result1.w
+            result1.rate = rate1
+            curr.push(result1)
 
-            _curr.push({
-                marbles: result1,
-                rate: result1.w / count
-            })
+            let result2 = Object.assign({}, item)
+            let rate2 = result2.w / count * item.rate
 
-            let result2 = Object.assign({}, item.marbles)
-            result2.w = Math.abs(result2.w - 1)
+            result2.w = Math.abs(result2.w - 1) % count
             result2.b = count - result2.w
-
-            _curr.push({
-                marbles: result2,
-                rate: result2.w / count
-            })
+            result2.rate = rate2
+            curr.push(result2)
         })
 
-        curr = _curr
-        console.log(curr)
-        // array = array.concat(curr)
+        array = curr
         step--
     }
-    // console.log(array)
-
-    return 0.5
+    return Number(array.filter(item => item.rate).reduce((curr, next) => curr + next.w / count * next.rate, 0).toFixed(2))
 }
 
 var assert = require('assert');
